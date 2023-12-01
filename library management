@@ -1,0 +1,228 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+class Book {
+    private String title;
+    private String author;
+    private int id;
+
+    public Book(int id, String title, String author) {
+        this.id = id;
+        this.title = title;
+        this.author = author;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    @Override
+    public String toString() {
+        return "Book{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                '}';
+    }
+}
+
+class User {
+    private String name;
+
+    public User(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
+class Library {
+    private List<Book> books;
+    private List<User> users;
+    private boolean[] bookAvailability;
+
+    public Library() {
+        this.books = new ArrayList<>();
+        this.users = new ArrayList<>();
+        this.bookAvailability = new boolean[100]; // Assuming a maximum of 100 books in the library
+    }
+
+    public void addBook(Book book) {
+        books.add(book);
+        bookAvailability[book.getId()] = true;
+    }
+
+    public void displayBooks() {
+        for (Book book : books) {
+            System.out.println(book);
+        }
+    }
+
+    public Book findBookById(int id) {
+        for (Book book : books) {
+            if (book.getId() == id) {
+                return book;
+            }
+        }
+        return null;
+    }
+
+    public List<Book> findBooksByTitle(String title) {
+        List<Book> result = new ArrayList<>();
+        for (Book book : books) {
+            if (book.getTitle().toLowerCase().contains(title.toLowerCase())) {
+                result.add(book);
+            }
+        }
+        return result;
+    }
+
+    public List<Book> findBooksByAuthor(String author) {
+        List<Book> result = new ArrayList<>();
+        for (Book book : books) {
+            if (book.getAuthor().toLowerCase().contains(author.toLowerCase())) {
+                result.add(book);
+            }
+        }
+        return result;
+    }
+
+    public void borrowBook(User user, int bookId) {
+        if (bookId < 0 || bookId >= bookAvailability.length) {
+            System.out.println("Invalid book ID");
+            return;
+        }
+
+        if (bookAvailability[bookId]) {
+            System.out.println(user.getName() + " has borrowed: " + findBookById(bookId));
+            bookAvailability[bookId] = false;
+        } else {
+            System.out.println("Book with ID " + bookId + " is not available for borrowing.");
+        }
+    }
+
+    public void returnBook(User user, int bookId) {
+        if (bookId < 0 || bookId >= bookAvailability.length) {
+            System.out.println("Invalid book ID");
+            return;
+        }
+
+        if (!bookAvailability[bookId]) {
+            System.out.println(user.getName() + " has returned: " + findBookById(bookId));
+            bookAvailability[bookId] = true;
+        } else {
+            System.out.println("Book with ID " + bookId + " is already available.");
+        }
+    }
+
+    public void addUser(User user) {
+        users.add(user);
+    }
+}
+
+public class LibraryManagementSystem {
+    public static void main(String[] args) {
+        Library library = new Library();
+        Scanner scanner = new Scanner(System.in);
+
+        // Adding some sample books
+        library.addBook(new Book(1, "The Catcher in the Rye", "J.D. Salinger"));
+        library.addBook(new Book(2, "To Kill a Mockingbird", "Harper Lee"));
+        library.addBook(new Book(3, "1984", "George Orwell"));
+
+        // Adding some sample users
+        library.addUser(new User("John"));
+        library.addUser(new User("Alice"));
+
+        while (true) {
+            System.out.println("\nLibrary Management System Menu:");
+            System.out.println("1. Display all books");
+            System.out.println("2. Find a book by ID");
+            System.out.println("3. Find books by title");
+            System.out.println("4. Find books by author");
+            System.out.println("5. Borrow a book");
+            System.out.println("6. Return a book");
+            System.out.println("7. Exit");
+            System.out.print("Enter your choice: ");
+
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    library.displayBooks();
+                    break;
+                case 2:
+                    System.out.print("Enter book ID: ");
+                    int bookId = scanner.nextInt();
+                    Book foundBook = library.findBookById(bookId);
+                    if (foundBook != null) {
+                        System.out.println("Book found: " + foundBook);
+                    } else {
+                        System.out.println("Book not found with ID: " + bookId);
+                    }
+                    break;
+                case 3:
+                    System.out.print("Enter title keyword: ");
+                    String titleKeyword = scanner.next();
+                    List<Book> booksByTitle = library.findBooksByTitle(titleKeyword);
+                    if (!booksByTitle.isEmpty()) {
+                        System.out.println("Books found by title:");
+                        for (Book book : booksByTitle) {
+                            System.out.println(book);
+                        }
+                    } else {
+                        System.out.println("No books found with the given title keyword.");
+                    }
+                    break;
+                case 4:
+                    System.out.print("Enter author keyword: ");
+                    String authorKeyword = scanner.next();
+                    List<Book> booksByAuthor = library.findBooksByAuthor(authorKeyword);
+                    if (!booksByAuthor.isEmpty()) {
+                        System.out.println("Books found by author:");
+                        for (Book book : booksByAuthor) {
+                            System.out.println(book);
+                        }
+                    } else {
+                        System.out.println("No books found with the given author keyword.");
+                    }
+                    break;
+                case 5:
+                    System.out.print("Enter your name: ");
+                    String userName = scanner.next();
+                    User user = new User(userName);
+                    library.addUser(user);
+
+                    System.out.print("Enter the book ID to borrow: ");
+                    int borrowBookId = scanner.nextInt();
+                    library.borrowBook(user, borrowBookId);
+                    break;
+                case 6:
+                    System.out.print("Enter your name: ");
+                    String returnUserName = scanner.next();
+                    User returnUser = new User(returnUserName);
+
+                    System.out.print("Enter the book ID to return: ");
+                    int returnBookId = scanner.nextInt();
+                    library.returnBook(returnUser, returnBookId);
+                    break;
+                case 7:
+                    System.out.println("Exiting Library Management System. Goodbye!");
+                    System.exit(0);
+                default:
+                    System.out.println("Invalid choice. Please enter a valid option.");
+            }
+        }
+    }
+}
